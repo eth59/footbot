@@ -56,7 +56,7 @@ async def prono(ctx: interactions.CommandContext, domicile: str,
     scope=MY_GUILD.id
 )
 async def classement(ctx: interactions.CommandContext):
-    # generate_standings()
+    generate_standings()
     message = "```ansi\n+----+-----------------+----+----+----+----+----+----+-----+-----+------------+\n"
     file = open('l1_standings.csv')
     csvreader = csv.reader(file)

@@ -2,7 +2,7 @@ from doctest import master
 import discord
 import interactions
 import csv
-from test_api import generate_standings
+from api import generate_standings
 
 TOKEN = "MTAyMzE4MjY3ODY4Nzc1NjMwOA.GBrX3H.Z5kHoLFq3oBxu4xdTjmypRtiSifMXges3EolLk"
 MY_GUILD = discord.Object(id=1010577304134623273)

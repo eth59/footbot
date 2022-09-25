@@ -403,7 +403,7 @@ async def help(ctx: interactions.CommandContext):
     message += "\nQu'est-ce que les requêtes ?\n"
     message += "L'API que j'utilise est limitée à 100 requêtes par jour. "
     message += "Il faut donc retenir que chaque commande correspond à 1 requête, "
-    message += "à l'exception de requetes_restantes et mes_pronos qui sont gratuites. N'abuse pas de moi jeune padawan !\n"
+    message += "à l'exception de requetes_restantes, pronos_journee et mes_pronos qui sont gratuites. N'abuse pas de moi jeune padawan !\n"
     message += "\nJe te souhaite de m'utiliser comme il se doit ! ;)\n```"
     await ctx.send(message)
     

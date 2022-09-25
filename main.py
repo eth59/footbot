@@ -5,7 +5,7 @@ import csv
 from api import *
 
 TOKEN = "MTAyMzE4MjY3ODY4Nzc1NjMwOA.GBrX3H.Z5kHoLFq3oBxu4xdTjmypRtiSifMXges3EolLk"
-MY_GUILD = discord.Object(id=1010577304134623273)
+MY_GUILD = discord.Object(id=667683204710531088)
 PREFIX = '!'
 
 

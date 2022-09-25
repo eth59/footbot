@@ -51,66 +51,66 @@ async def prono(ctx: interactions.CommandContext, domicile: str,
                 exterieur: str, butdomicile: int, butexterieur: int):
     dom = nickname(domicile)
     ext = nickname(exterieur)
-    # try:
-    #     update_bdd()
-    # except Exception as e:
-    #     print(f"\n\n\n")
-    #     print(type(e))
-    #     print(f"Erreur lors d'une tentative d'ajout d'un pronostic (maj BDD) :\n {e}\n\n\n")
-    #     await ctx.send("Une erreur inconnue s'est produite lors de la tentative d'actulasation des matchs.")
-    # else:
     try:
-        conn = sqlite3.connect('prono.db')
-        cursor = conn.cursor()
-        
-        cursor.execute("""
-        SELECT id_match, domicile, exterieur, commence FROM matchs
-        """)
-        match_list = cursor.fetchall()
-        for match in match_list:
-            if match[1] == dom and match[2] == ext:
-                id_match = match[0]
-                if match[3] == 1:
-                    raise ValueError
-                break
-            
-        id_user =int(str(ctx.user.id))
-        cursor.execute("""
-        SELECT id_user FROM users WHERE id_user = ?
-        """,[id_user])
-        users_list = cursor.fetchall()
-        if users_list == []:
-            user_values = (
-                id_user,
-                ctx.user.username,
-                ctx.user.discriminator
-            )
-            cursor.execute("""
-            INSERT INTO users (id_user, pseudo, discriminator) VALUES (?, ?, ?)            
-            """, user_values)
-            conn.commit()
-        
-        values = (id_match, id_user, butdomicile, butexterieur)
-        cursor.execute("""
-        INSERT INTO pronos (id_match, id_user, butDomicile, butExterieur)
-        VALUES (?, ?, ?, ?)
-        """, values)
-        conn.commit()
-        await ctx.send("Votre pronostic a été pris en compte.")
-    except sqlite3.IntegrityError:
-        await ctx.send("Vous avez déjà pronostiqué ce match.")
-    except UnboundLocalError:
-        await ctx.send("Ce match n'existe pas.")
-    except ValueError:
-        await ctx.send("Espèce de tricheur ! On ne parie pas sur un match qui est fini !")
+        update_bdd()
     except Exception as e:
         print(f"\n\n\n")
         print(type(e))
-        print(f"Erreur lors d'une tentative d'ajout d'un pronostic :\n {e}\n\n\n")
-        conn.rollback()
-        await ctx.send("Une erreur inconnue s'est produite.")
-    finally:
-        conn.close()
+        print(f"Erreur lors d'une tentative d'ajout d'un pronostic (maj BDD) :\n {e}\n\n\n")
+        await ctx.send("Une erreur inconnue s'est produite lors de la tentative d'actulasation des matchs.")
+    else:
+        try:
+            conn = sqlite3.connect('prono.db')
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+            SELECT id_match, domicile, exterieur, commence FROM matchs
+            """)
+            match_list = cursor.fetchall()
+            for match in match_list:
+                if match[1] == dom and match[2] == ext:
+                    id_match = match[0]
+                    if match[3] == 1:
+                        raise ValueError
+                    break
+                
+            id_user =int(str(ctx.user.id))
+            cursor.execute("""
+            SELECT id_user FROM users WHERE id_user = ?
+            """,[id_user])
+            users_list = cursor.fetchall()
+            if users_list == []:
+                user_values = (
+                    id_user,
+                    ctx.user.username,
+                    ctx.user.discriminator
+                )
+                cursor.execute("""
+                INSERT INTO users (id_user, pseudo, discriminator) VALUES (?, ?, ?)            
+                """, user_values)
+                conn.commit()
+            
+            values = (id_match, id_user, butdomicile, butexterieur)
+            cursor.execute("""
+            INSERT INTO pronos (id_match, id_user, butDomicile, butExterieur)
+            VALUES (?, ?, ?, ?)
+            """, values)
+            conn.commit()
+            await ctx.send("Votre pronostic a été pris en compte.")
+        except sqlite3.IntegrityError:
+            await ctx.send("Vous avez déjà pronostiqué ce match.")
+        except UnboundLocalError:
+            await ctx.send("Ce match n'existe pas.")
+        except ValueError:
+            await ctx.send("Espèce de tricheur ! On ne parie pas sur un match qui est fini !")
+        except Exception as e:
+            print(f"\n\n\n")
+            print(type(e))
+            print(f"Erreur lors d'une tentative d'ajout d'un pronostic :\n {e}\n\n\n")
+            conn.rollback()
+            await ctx.send("Une erreur inconnue s'est produite.")
+        finally:
+            conn.close()
     
     
 @bot.command(

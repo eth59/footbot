@@ -7,7 +7,6 @@ from api import *
 TOKEN = "MTAyMzE4MjY3ODY4Nzc1NjMwOA.GBrX3H.Z5kHoLFq3oBxu4xdTjmypRtiSifMXges3EolLk"
 MY_GUILD = discord.Object(id=1010577304134623273)
 MY_GUILD2 = discord.Object(id=667683204710531088)
-PREFIX = '!'
 
 bot = interactions.Client(token=TOKEN)
 
@@ -33,7 +32,10 @@ async def mes_pronos(ctx: interactions.CommandContext):
     message = ''
     for elt in res:
         message += f"{elt[0]} {elt[2]}-{elt[3]} {elt[1]}"
-    await ctx.author.send(message)
+    if message != "":
+        await ctx.author.send(message)
+    else:
+        await ctx.author.send("T'as pas fait de prono ducon !")
     await ctx.send("Va voir tes DMs BG !")
 
 

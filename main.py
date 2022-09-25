@@ -1,5 +1,3 @@
-from msilib.schema import Error
-from optparse import Option
 import sqlite3
 import discord
 import interactions

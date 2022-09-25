@@ -112,7 +112,7 @@ def update_bdd():
                     else:
                         points_win = 20
                     if (abs(prono[2]-prono[3]) == abs(butD-butE)):
-                        points_win +=100
+                        points_win += 50
                     if (prono[2]==butD and prono[3]==butE):
                         points_win += 100
                         
@@ -125,11 +125,6 @@ def update_bdd():
                     SET points = ?
                     WHERE id_user = ?
                     """, (points[0]+points_win, prono[1]))
-                    conn.commit()
-                    cursor.execute("""
-                    DELETE FROM pronos
-                    WHERE id_match = ? AND id_user = ?
-                    """, (prono[0], prono[1]))
                     conn.commit()
                         
     except Exception as e:
@@ -185,4 +180,30 @@ def get_points():
         raise e
     finally:
         conn.close()
+    return res
+
+
+def get_journee(numero):
+    payload={}
+    headers = {
+        'x-apisports-key': 'dc155322ba6c5a28850ada669a659f34'
+    }
+    url = "https://v3.football.api-sports.io/fixtures?league=61&season=2022"
+    response = requests.request("GET", url, headers=headers, data=payload)
+    data = response.json()
+    res = []
+    for match in data['response']:
+        if "Regular Season - "+str(numero) == match['league']['round']:
+            dom = match['teams']['home']['name']
+            ext = match['teams']['away']['name']
+            butDom = match['goals']['home']
+            butExt = match['goals']['away']
+            date = match['fixture']['date']
+            jour = date[8:10]
+            mois = date[5:7]
+            annee = date[:4]
+            heure = date[11:16]
+            timezone = match['fixture']['timezone']
+            status = match['fixture']['status']['short']
+            res.append((dom, ext, butDom, butExt, jour, mois, annee, heure, timezone, status))
     return res

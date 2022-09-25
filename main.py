@@ -1,3 +1,5 @@
+from msilib.schema import Error
+from optparse import Option
 import sqlite3
 import discord
 import interactions
@@ -9,12 +11,92 @@ MY_GUILD = discord.Object(id=1010577304134623273)
 MY_GUILD2 = discord.Object(id=667683204710531088)
 PREFIX = '!'
 
-
 bot = interactions.Client(token=TOKEN)
 
 @bot.event
 async def on_ready():
     print("Le bot est prêt.")
+    
+    
+@bot.command(
+    name="mes_pronos",
+    description="Envoie tes pronos en DM",
+    scope=[MY_GUILD.id, MY_GUILD2.id]
+)
+async def mes_pronos(ctx: interactions.CommandContext):
+    conn = sqlite3.connect('prono.db')
+    cursor = conn.cursor()
+    cursor.execute("""
+    SELECT domicile, exterieur, pronos.butDomicile, pronos.butExterieur FROM matchs
+    JOIN pronos ON pronos.id_match = matchs.id_match
+    WHERE id_user = ?
+    """, (int(str(ctx.user.id)),))
+    res = cursor.fetchall()
+    message = ''
+    for elt in res:
+        message += f"{elt[0]} {elt[2]}-{elt[3]} {elt[1]}"
+    await ctx.author.send(message)
+    await ctx.send("Va voir tes DMs BG !")
+
+
+@bot.command(
+    name="pronos_journee",
+    description="Affiche tes pronos sur une journée (VISIBLE DE TOUS).",
+    scope=[MY_GUILD.id, MY_GUILD2.id],
+    options=[
+        interactions.Option(
+            name="numero_journee",
+            description="Le numero de la journée que tu veux voir",
+            type=interactions.OptionType.INTEGER,
+            required=True
+        )
+    ]
+)
+async def pronos_journee(ctx: interactions.CommandContext, numero_journee: int):
+    try:
+        conn = sqlite3.connect('prono.db')
+        cursor = conn.cursor()
+        cursor.execute("""
+        SELECT domicile, exterieur, matchs.butDomicile, matchs.butExterieur, pronos.butDomicile, pronos.butExterieur, pronos.points FROM matchs
+        JOIN pronos ON matchs.id_match = pronos.id_match
+        WHERE id_user = ? AND numero_journee = ?
+        """, (int(str(ctx.user.id)), numero_journee))
+        message="```\n+---------------------------+-------+-------+\n"
+        message += "|           Match           | Score | Prono |\n"
+        message += "+---------------------------+-------+-------+\n"        
+        for (dom, ext, butDR, butER, butDP, butEP, pts) in cursor.fetchall():
+            if dom == "Paris Saint Germain":
+                dom = "PSG"
+            elif ext == "Paris Saint Germain":
+                ext = "PSG"
+            if dom == "Stade Brestois 29":
+                dom = "Brest"
+            elif ext == "Stade Brestois 29":
+                ext = "Brest"
+            if dom == "Estac Troyes":
+                dom = "Troyes"
+            elif ext == "Estac Troyes":
+                ext = "Troyes"
+            if dom == "Clermont Foot":
+                dom = "Clermont"
+            elif ext == "Clermont Foot":
+                ext = "Clermont"
+            if butDR is None or butER is None:
+                message += f"| {dom:>12}-{ext:<12} |  TBD  | {butDP:>2}-{butEP:<2} |\n"
+            else:
+                message += f"| {dom:>12}-{ext:<12} | {butDR:>2}-{butER:<2} | {butDP:>2}-{butEP:<2} |\n"
+        message += "+---------------------------+-------+-------+\n```"
+        await ctx.send(message)
+        
+    except Exception as e:
+        print(f"\n\n\n")
+        print(type(e))
+        print(f"Erreur lors de l'affichage des pronos d'une journée :\n {e}\n\n\n")
+        conn.rollback()
+        await ctx.send("Une erreur inconnue s'est produite.")
+    finally:
+        conn.close()
+
 
 @bot.command(
     name="prono",
@@ -49,6 +131,7 @@ async def on_ready():
 )
 async def prono(ctx: interactions.CommandContext, domicile: str,
                 exterieur: str, butdomicile: int, butexterieur: int):
+    await ctx.defer()
     dom = nickname(domicile)
     ext = nickname(exterieur)
     try:
@@ -74,7 +157,7 @@ async def prono(ctx: interactions.CommandContext, domicile: str,
                         raise ValueError
                     break
                 
-            id_user =int(str(ctx.user.id))
+            id_user = int(str(ctx.user.id))
             cursor.execute("""
             SELECT id_user FROM users WHERE id_user = ?
             """,[id_user])
@@ -98,7 +181,13 @@ async def prono(ctx: interactions.CommandContext, domicile: str,
             conn.commit()
             await ctx.send("Votre pronostic a été pris en compte.")
         except sqlite3.IntegrityError:
-            await ctx.send("Vous avez déjà pronostiqué ce match.")
+            cursor.execute("""
+            UPDATE pronos
+            SET butDomicile = ?, butExterieur = ?
+            WHERE id_match = ? AND id_user = ?            
+            """, (values[2], values[3], values[0], values[1]))
+            conn.commit()
+            await ctx.send("Votre pronostic a été modifié.")
         except UnboundLocalError:
             await ctx.send("Ce match n'existe pas.")
         except ValueError:
@@ -145,6 +234,7 @@ async def liste_equipe(ctx: interactions.CommandContext):
     message += "```"
     await ctx.send(message)
     
+    
 @bot.command(
     name="info_match",
     description="Donne quelques infos sur un match",
@@ -185,6 +275,7 @@ async def info_match(ctx: interactions.CommandContext, domicile: str, exterieur:
         message += f"Arbitré par : {match['fixture']['referee']}\n"
         message += "```"
         await ctx.send(message)
+     
         
 @bot.command(
     name="points",
@@ -258,6 +349,7 @@ async def classement(ctx: interactions.CommandContext):
     message += "\u001b[0m+----+-----------------+----+----+----+----+----+----+-----+-----+------------+\n```"
     await ctx.send(message)
     
+    
 @bot.command(
     name="actualise",
     description="Met à jour la base de données des matchs.",
@@ -275,6 +367,7 @@ async def actualise(ctx: interactions.CommandContext):
     else:
         await ctx.send("Les matchs ont bien été actualisés.")
 
+
 @bot.command(
     name='requetes_restantes',
     description="Affiche le nombre de requêtes restantes pour la journée",
@@ -283,6 +376,7 @@ async def actualise(ctx: interactions.CommandContext):
 async def requetes_restantes(ctx: interactions.CommandContext):
     answer = get_remaining_requests()
     await ctx.send(f"Il vous reste {answer} requêtes pour la journée.")
+
 
 @bot.command(
     name='help',
@@ -296,20 +390,57 @@ async def help(ctx: interactions.CommandContext):
     message += "- classement : Affiche le classement actuel de la ligue 1\n"
     message += "- liste_equipe : Affiche la liste des équipes (dans le format pris en charge par les commandes)\n"
     message += "- info_match : Affiche quelques infos plus ou moins utiles sur un match\n"
+    message += "- affiche_journee : Affiche les matchs d'une journée\n"
     message += "- prono (et pas porno) : Le plus important ! Permez de pronostiquer un match\n"
+    message += "- mes_pronos (et pas mes_pornos) : Envoie des pornos en DM\n"
+    message += "- pronos_journee (et pas pornos_journee) : Affiche vos pronos sur une journée\n"
     message += "- actualise : Permet d'actualiser la base de données et donc de vous donner des points (si vous avez pronostiqué bien sûr)\n"
     message += "- points : Affiche les points de chaque utilisateur\n"
     message += "- requetes_restantes : Affiche le nombre de requêtes restantes (cf plus bas)\n"
     message += "\nLes points sont attribués de cette manière :\n"
     message += "- 20 points si vous avez pronostiqué avec le cul\n"
     message += "- 100 points si vous avez pronostiqué le bon vainqueur (ou le nul)\n"
-    message += "- 100 points bonus si vous avez la bonne différence de buts\n"
+    message += "- 50 points bonus si vous avez la bonne différence de buts\n"
     message += "- 100 points bonus si vous avez le score exact (cumulable avec la différence de buts)\n"
     message += "\nQu'est-ce que les requêtes ?\n"
     message += "L'API que j'utilise est limitée à 100 requêtes par jour. "
     message += "Il faut donc retenir que chaque commande correspond à 1 requête, "
-    message += "à l'exception de requetes_restantes qui est gratuite. N'abuse pas de moi jeune padawan !\n"
+    message += "à l'exception de requetes_restantes et mes_pronos qui sont gratuites. N'abuse pas de moi jeune padawan !\n"
     message += "\nJe te souhaite de m'utiliser comme il se doit ! ;)\n```"
     await ctx.send(message)
+    
+
+@bot.command(
+    name='affiche_journee',
+    description="Affiche les matchs d'une journee",
+    scope=[MY_GUILD.id, MY_GUILD2.id],
+    options=[
+        interactions.Option(
+            name="numero",
+            description="Le numero de la journée que tu veux voir.",
+            type=interactions.OptionType.INTEGER,
+            required=True
+        )
+    ]
+)
+async def affiche_journee(ctx: interactions.CommandContext, numero: int):
+    res = get_journee(numero)
+    res.sort(key=lambda tup: tup[7])
+    res.sort(key=lambda tup: tup[4])
+    res.sort(key=lambda tup: tup[5])
+    res.sort(key=lambda tup: tup[6])
+    message = "```\n"
+    for (dom, ext, butDom, butExt, jour, mois, annee, heure, timezone, status) in res:
+        if status == 'TBD':
+            message += f"{dom} - {ext} TBD ({jour}-{mois}-{annee})\n"
+        else:
+            if butDom is None or butExt is None:
+                message += f"{dom} - {ext} le "
+            else:
+                message += f"{dom} {butDom}-{butExt} {ext} le "
+            message += f"{jour}-{mois}-{annee} à {heure} {timezone}\n"
+    message += "```"
+    await ctx.send(message)
+    
     
 bot.start()

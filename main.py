@@ -5,7 +5,8 @@ import csv
 from api import *
 
 TOKEN = "MTAyMzE4MjY3ODY4Nzc1NjMwOA.GBrX3H.Z5kHoLFq3oBxu4xdTjmypRtiSifMXges3EolLk"
-MY_GUILD = discord.Object(id=667683204710531088)
+MY_GUILD = discord.Object(id=1010577304134623273)
+MY_GUILD2 = discord.Object(id=667683204710531088)
 PREFIX = '!'
 
 
@@ -18,7 +19,7 @@ async def on_ready():
 @bot.command(
     name="prono",
     description="Pronostique un match !",
-    scope=MY_GUILD.id,
+    scope=[MY_GUILD.id, MY_GUILD2.id],
     options=[
         interactions.Option(
             name="domicile",
@@ -115,7 +116,7 @@ async def prono(ctx: interactions.CommandContext, domicile: str,
 @bot.command(
     name="liste_equipe",
     description="Donne la liste de toutes les équipes",
-    scope=MY_GUILD.id
+    scope=[MY_GUILD.id, MY_GUILD2.id]
 )
 async def liste_equipe(ctx: interactions.CommandContext):
     team_list = get_team_list()
@@ -147,7 +148,7 @@ async def liste_equipe(ctx: interactions.CommandContext):
 @bot.command(
     name="info_match",
     description="Donne quelques infos sur un match",
-    scope=MY_GUILD.id,
+    scope=[MY_GUILD.id, MY_GUILD2.id],
     options=[
         interactions.Option(
             name="domicile",
@@ -188,7 +189,7 @@ async def info_match(ctx: interactions.CommandContext, domicile: str, exterieur:
 @bot.command(
     name="points",
     description="Affiche les points des utilisateurs.",
-    scope=MY_GUILD.id
+    scope=[MY_GUILD.id, MY_GUILD2.id]
 )
 async def points(ctx: interactions.CommandContext):
     try:
@@ -210,7 +211,7 @@ async def points(ctx: interactions.CommandContext):
 @bot.command(
     name="classement",
     description="Affiche le classement de la ligue 1",
-    scope=MY_GUILD.id
+    scope=[MY_GUILD.id, MY_GUILD2.id]
 )
 async def classement(ctx: interactions.CommandContext):
     generate_standings()
@@ -260,7 +261,7 @@ async def classement(ctx: interactions.CommandContext):
 @bot.command(
     name="actualise",
     description="Met à jour la base de données des matchs.",
-    scope=MY_GUILD.id
+    scope=[MY_GUILD.id, MY_GUILD2.id]
 )
 async def actualise(ctx: interactions.CommandContext):
     await ctx.defer()
@@ -277,7 +278,7 @@ async def actualise(ctx: interactions.CommandContext):
 @bot.command(
     name='requetes_restantes',
     description="Affiche le nombre de requêtes restantes pour la journée",
-    scope=MY_GUILD.id
+    scope=[MY_GUILD.id, MY_GUILD2.id]
 )
 async def requetes_restantes(ctx: interactions.CommandContext):
     answer = get_remaining_requests()
@@ -286,7 +287,7 @@ async def requetes_restantes(ctx: interactions.CommandContext):
 @bot.command(
     name='help',
     description='Aide les noobs.',
-    scope=MY_GUILD.id
+    scope=[MY_GUILD.id, MY_GUILD2.id]
 )
 async def help(ctx: interactions.CommandContext):
     message = "```\n"

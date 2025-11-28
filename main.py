@@ -4,9 +4,9 @@ import interactions
 import csv
 from api import *
 
-TOKEN = "MTAyMzE4MjY3ODY4Nzc1NjMwOA.GBrX3H.Z5kHoLFq3oBxu4xdTjmypRtiSifMXges3EolLk"
-MY_GUILD = discord.Object(id=1010577304134623273)
-MY_GUILD2 = discord.Object(id=667683204710531088)
+TOKEN = ""
+MY_GUILD = discord.Object(id=0)
+MY_GUILD2 = discord.Object(id=0)
 
 bot = interactions.Client(token=TOKEN)
 
@@ -443,4 +443,5 @@ async def affiche_journee(ctx: interactions.CommandContext, numero: int):
     await ctx.send(message)
     
     
+
 bot.start()

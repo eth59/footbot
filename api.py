@@ -5,7 +5,7 @@ import sqlite3
 def generate_standings():
     payload={}
     headers = {
-        'x-apisports-key': 'dc155322ba6c5a28850ada669a659f34'
+        'x-apisports-key': ''
     }            
     url = f"https://v3.football.api-sports.io/standings?league=61&season=2022"
     response = requests.request("GET", url, headers=headers, data=payload)
@@ -33,7 +33,7 @@ def generate_standings():
 def get_match(domicile, exterieur):
     payload={}
     headers = {
-        'x-apisports-key': 'dc155322ba6c5a28850ada669a659f34'
+        'x-apisports-key': ''
     }
     url = "https://v3.football.api-sports.io/fixtures?league=61&season=2022"
     response = requests.request("GET", url, headers=headers, data=payload)
@@ -47,7 +47,7 @@ def get_match(domicile, exterieur):
 def get_team_list():
     payload={}
     headers = {
-        'x-apisports-key': 'dc155322ba6c5a28850ada669a659f34'
+        'x-apisports-key': ''
     }
     url = "https://v3.football.api-sports.io/teams?league=61&season=2022"
     response = requests.request("GET", url, headers=headers, data=payload)
@@ -64,7 +64,7 @@ def update_bdd():
         cursor = conn.cursor()
         payload={}
         headers = {
-            'x-apisports-key': 'dc155322ba6c5a28850ada669a659f34'
+            'x-apisports-key': ''
         }
         url = "https://v3.football.api-sports.io/fixtures?league=61&season=2022"
         response = requests.request("GET", url, headers=headers, data=payload)
@@ -159,7 +159,7 @@ def nickname(name):
 def get_remaining_requests():
     payload={}
     headers = {
-        'x-apisports-key': 'dc155322ba6c5a28850ada669a659f34'
+        'x-apisports-key': ''
     }
     url = "https://v3.football.api-sports.io/status"
     response = requests.request("GET", url, headers=headers, data=payload)
@@ -186,7 +186,7 @@ def get_points():
 def get_journee(numero):
     payload={}
     headers = {
-        'x-apisports-key': 'dc155322ba6c5a28850ada669a659f34'
+        'x-apisports-key': ''
     }
     url = "https://v3.football.api-sports.io/fixtures?league=61&season=2022"
     response = requests.request("GET", url, headers=headers, data=payload)
@@ -206,4 +206,5 @@ def get_journee(numero):
             timezone = match['fixture']['timezone']
             status = match['fixture']['status']['short']
             res.append((dom, ext, butDom, butExt, jour, mois, annee, heure, timezone, status))
+
     return res
